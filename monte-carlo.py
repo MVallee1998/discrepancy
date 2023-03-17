@@ -126,12 +126,12 @@ def gradiant(dim, number):
             for iter_comb in itertools.combinations(range(dim), 2):
                 small_rotation = np.eye(dim)
                 plane_rot = np.array([[cos(d_theta), sin(d_theta)], [-sin(d_theta), cos(d_theta)]],dtype=np.double)
-                small_rotation[iter_comb, :][:, iter_comb] = plane_rot
+                small_rotation[iter_comb, :][:, iter_comb] = plane_rot.copy()
                 list_rotation.append(small_rotation.copy())
                 list_rotation.append(small_rotation.T.copy())
             delta = 1
             while delta > epsilon:
-                maxn = 1
+                maxn = min_norm_inf(rotated_vertices(rotation, V))
                 for small_rotation in list_rotation:
                     new_rotation = np.dot(small_rotation, rotation)
                     minnorm = min_norm_inf(rotated_vertices(new_rotation, V))
@@ -142,13 +142,13 @@ def gradiant(dim, number):
                 last_maxn = maxn
                 rotation = maxrot.copy()
             d_theta = d_theta/2
+        print(maxn)
         if maxn>best:
-            print(maxn)
             best = maxn
         # return str(dim)+" log="+str(log(dim))+" loglog="+str(log(log(dim)))+" result: " + str(max(results))
     print("infnorms of vertices of a cube with max mininfnorm")
     # print ([norm_inf(x) for x in rotated_vertices(maxrot,V) ])
-    return str(dim) + " " + str(round(maxn, 30))
+    return str(dim) + " " + str(round(best, 30))
 
 def sample_all(N):
     for i in range(1, N):
