@@ -122,7 +122,7 @@ def gradiant(dim, number):
         d_theta = pi / 8
         last_maxn = maxn
         while d_theta > epsilon:
-            list_rotation = []
+            list_rotation = [np.eye(dim)]
             for iter_comb in itertools.combinations(range(dim), 2):
                 small_rotation = np.eye(dim)
                 plane_rot = np.array([[cos(d_theta), sin(d_theta)], [-sin(d_theta), cos(d_theta)]],dtype=np.double)
@@ -156,4 +156,4 @@ def sample_all(N):
 
 
 # sample_all(17)
-print(gradiant(3, 1000000))
+print(gradiant(4, 1000000))
