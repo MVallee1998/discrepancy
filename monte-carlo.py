@@ -4,7 +4,7 @@ import tqdm
 
 import numpy as np
 
-epsilon = 10 ** (-100)
+epsilon = 2 ** (-100)
 
 
 def rotM(dim=3):
@@ -34,7 +34,7 @@ def rotM(dim=3):
 # print(m8.dot(np.array([1,0,0,0,0,0,0,0])))
 
 def vertices(dim=3, a=1):
-    V = np.array(list(itertools.product([-a, a], repeat=dim))[:2 ** (dim - 1)],dtype=np.double).T
+    V = np.array(list(itertools.product([-a, a], repeat=dim))[:2 ** (dim - 1)],dtype=np.longdouble).T
     return V
 
 
@@ -102,7 +102,7 @@ def sampling(dim, number):
 def gradiant(dim, number):
     V = vertices(dim, 1)  # a=2
     best = 1
-    for i in tqdm.tqdm(range(number)):
+    for i in tqdm.tqdm(range(number*10)):
         counter = 0
         results = []
         maxn = 0
@@ -119,19 +119,20 @@ def gradiant(dim, number):
             if counter > number / 100:
                 break
         rotation = maxrot
-        d_theta = pi / 8
+        d_theta = pi / 16
         last_maxn = maxn
         while d_theta > epsilon:
-            list_rotation = [np.eye(dim)]
+            list_rotation = []
             for iter_comb in itertools.combinations(range(dim), 2):
                 small_rotation = np.eye(dim)
-                plane_rot = np.array([[cos(d_theta), sin(d_theta)], [-sin(d_theta), cos(d_theta)]],dtype=np.double)
+                plane_rot = np.array([[cos(d_theta), sin(d_theta)], [-sin(d_theta), cos(d_theta)]],dtype=np.longdouble)
                 small_rotation[iter_comb, :][:, iter_comb] = plane_rot.copy()
                 list_rotation.append(small_rotation.copy())
                 list_rotation.append(small_rotation.T.copy())
             delta = 1
             while delta > epsilon:
-                maxn = min_norm_inf(rotated_vertices(rotation, V))
+                maxn = last_maxn
+                maxrot = rotation.copy()
                 for small_rotation in list_rotation:
                     new_rotation = np.dot(small_rotation, rotation)
                     minnorm = min_norm_inf(rotated_vertices(new_rotation, V))
@@ -142,12 +143,10 @@ def gradiant(dim, number):
                 last_maxn = maxn
                 rotation = maxrot.copy()
             d_theta = d_theta/2
-        print(maxn)
         if maxn>best:
+            print(maxn)
             best = maxn
-        # return str(dim)+" log="+str(log(dim))+" loglog="+str(log(log(dim)))+" result: " + str(max(results))
     print("infnorms of vertices of a cube with max mininfnorm")
-    # print ([norm_inf(x) for x in rotated_vertices(maxrot,V) ])
     return str(dim) + " " + str(round(best, 30))
 
 def sample_all(N):
@@ -156,4 +155,4 @@ def sample_all(N):
 
 
 # sample_all(17)
-print(gradiant(4, 1000000))
+print(gradiant(6, 10000))
